@@ -1,31 +1,4 @@
-
-##################################################
-## autor: Camilo Leon contacto: cleon@unal.edu.co
-## version: 0.1
-## version python: 3.7
-## fecha publicacion: 
-##
-## INDICACIONES PARA EL USO DEL SCRIPT
-## Se requiere que el usuario actualice las dos lineas siguientes a la linea #### Info requerida al usuario
-## Se debe tener permiso de escritura en la carpeta donde se ejecuta el script puesto que todo se almacenara en esta carpeta
-##
-## Ciudad:
-## se ingresa en la linea 16, contiene el listado de estaciones magnaeco del IGAC, EAAB, UDistrial a 2020-04-01. El Diccionario de ciudades disponibles esta en la linea 109
-##
-## Archivos que descarga:
-## 1- Informacion de los satelites: efemerides precisas, correciones de reloj
-## Servicios: 
-##      GLONASS
-##      Center for Orbit Determination in Europe (CODE)
-##      ESA
-## 2- Archivos RINEX estaciones magnaeco
-##      Accede al ftp del IGAC para la descarga de los archivos RINEX disponibles para la fecha de observacion GNSS. Importante tener presente las especificaciones de acceso a los archivos segun la entidad.
-## 3- Coordenadas conocidas:
-##      Intenta la descarga de archivos desde SIRGAS. Busca las coordenadas de las ultimas 4 semanas GPS incluyendo la correspondiente a la fecha de toma.
-##      Descarga el archivo de coordenadas xyz2 del servicio Nevada Geodetic Laboratory de la estacion BOGT (unico que se mantiene actualizado)
-##################################################
-
-
+# contact email: cleon@unal.edu.co
 import datetime, calendar
 import requests
 import os,sys
@@ -38,8 +11,8 @@ carpetaActual = os.path.dirname(rutaActual)
 
 os.chdir(carpetaActual)
 
-#### Info requerida al usuario
-obsDate = datetime.date(2020,2,15)
+#### User Input
+obsDate = datetime.date(2020,3,19)
 cuidadBase = 'Bogotá'
 
 def gpsCalendar(obsDate):
@@ -66,7 +39,7 @@ def CalendarD2GPST(date):
     time0 = datetime.date(1980, 1, 6)
     delta = date - time0
     delta = delta.total_seconds()
-    weeks = delta//604800 # Number of Weeks
+    weeks = delta//604800
     dow = round((delta/604800 - weeks) * 7,1)
     doy = date.timetuple().tm_yday
     strDOY = f'{doy}'
@@ -120,9 +93,9 @@ for i in listGPSValues:
     print(i)
 
 folderCreation(listGPSValues[0])
-rinexPath = folderCreation(f'{listGPSValues[0]}/RINEX magnaeco') # Donde se almacenara los datos RINEX
-satellitesPath = folderCreation(f'{listGPSValues[0]}/info Satelites') # Donde se almacenara los datos de los satelites
-coordPath = folderCreation(f'{listGPSValues[0]}/Coordenadas Conocidas') # Donde se alacemara los archivos de coordenadas conocidas
+rinexPath = folderCreation(f'{listGPSValues[0]}/RINEX magnaeco') # RINEX storing folder
+satellitesPath = folderCreation(f'{listGPSValues[0]}/info Satelites') # satellite info folder
+coordPath = folderCreation(f'{listGPSValues[0]}/Coordenadas Conocidas') # Station coordinates folder
 
 glonass30sClock = f'ftp://ftp.glonass-iac.ru/MCC/PRODUCTS/{listGPSValues[0][:2]}{listGPSValues[3]}/final/Sta30s{listGPSValues[1]}{listGPSValues[2]}.clk'
 glonassClock = f'ftp://ftp.glonass-iac.ru/MCC/PRODUCTS/{listGPSValues[0][:2]}{listGPSValues[3]}/final/Sta{listGPSValues[1]}{listGPSValues[2]}.clk'
@@ -138,7 +111,7 @@ estMagnaEco = {'Aguachica':['AGCA'], 'San Alberto':['ALBE'], 'San Andrés':['AND
 
 estBase = estMagnaEco[cuidadBase]
 
-## Descarga IGAC
+## RINEX Download
 for estacion in estBase:
     obsFilesPath = folderCreation(f'{rinexPath}/{listGPSValues[0][:2]}o')
     gpsNavFiles = folderCreation(f'{rinexPath}/{listGPSValues[0][:2]}n')
@@ -158,7 +131,7 @@ for estacion in estBase:
     fileDownload(gpsNavFiles,rinexGPSNAV)
     fileDownload(glonassNavFiles,rinexGLONASSNAV)
 
-## Descarga Datos Satelitales
+## Satellite info Download
 fileDownload(satellitesPath,CODEClock)
 fileDownload(satellitesPath,CODEEphemeris)
 fileDownload(satellitesPath,glonass30sClock)
@@ -168,7 +141,7 @@ fileDownload(satellitesPath,igs30sClock)
 fileDownload(satellitesPath,igsClock)
 fileDownload(satellitesPath,igsEphemeris)
 
-## Descarga Coordenadas conocidas
+## Station Coordinates Download
 weekMin = listGPSValues[1]-3
 weekMax = listGPSValues[1]+1
 
@@ -183,4 +156,4 @@ urlNGL = 'http://geodesy.unr.edu/gps_timeseries/txyz/IGS14/BOGT.txyz2'
 fileDownload(coordPath,urlNGL)
 
 
-print('Descarga finalizada')
+print('\n Download Finished')
